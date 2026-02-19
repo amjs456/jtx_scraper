@@ -45,6 +45,10 @@ def run(Playwright, order_codes):
     browser.close()
     return items
 
+def save_excel_file(items, filename):
+    pass
+
+
 with sync_playwright() as playwright:
     csv_file_name = sys.argv[1]
     if not csv_file_name.endswith(".csv"):
