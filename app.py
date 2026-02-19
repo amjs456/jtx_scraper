@@ -23,7 +23,7 @@ def run(Playwright, order_codes):
     item_n = len(order_codes)
     for i, order_code in enumerate(order_codes):
         page.goto(JTX_URL+order_code)
-        code = maker = url = name = price = is_price_red = None
+        item_code = maker = url = name = price = is_price_red = None
         is_not_six_digit = False
 
         if not len(order_code)==6:
@@ -34,12 +34,12 @@ def run(Playwright, order_codes):
             if price.startswith("<font"):
                 price=price[21:-7]
                 is_price_red = True
-            code = page.locator("div.info p.txt span").nth(3).inner_html()[7:]
+            item_code = page.locator("div.info p.txt span").nth(3).inner_html()[7:]
             maker = page.locator("div.info p.txt span").nth(0).inner_html()[6:]
             url = page.url
             name = page.locator("div.info h2").inner_html()
 
-        item_info = [maker, name, price, is_price_red, code, url, is_not_six_digit]
+        item_info = [maker, name, price, is_price_red, item_code, url, is_not_six_digit]
         items.append(item_info)
         print(str(i+1)+"/"+str(item_n)+" completed!")
     browser.close()
