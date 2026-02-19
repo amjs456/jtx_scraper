@@ -39,7 +39,16 @@ def run(Playwright, order_codes):
             url = page.url
             name = page.locator("div.info h2").inner_html()
 
-        item_info = [maker, name, price, is_price_red, item_code, url, is_not_six_digit]
+        item_info = {
+            "order_code":order_code,
+            "maker":maker,
+            "name":name,
+            "price":price,
+            "is_price_red":is_price_red,
+            "item_code":item_code,
+            "url":url,
+            "is_not_six_digit":is_not_six_digit
+        }
         items.append(item_info)
         print(str(i+1)+"/"+str(item_n)+" completed!")
     browser.close()
