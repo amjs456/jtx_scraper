@@ -43,11 +43,12 @@ def run(Playwright, order_codes):
         items.append(item_info)
         print(str(i+1)+"/"+str(item_n)+" completed!")
     browser.close()
+    return items
 
 with sync_playwright() as playwright:
     csv_file_name = sys.argv[1]
     if not csv_file_name.endswith(".csv"):
         csv_file_name = csv_file_name + ".csv"    
         order_codes=  create_order_codes(csv_file_name)
-        run(playwright, order_codes)
+        items = run(playwright, order_codes)
         print(items)
