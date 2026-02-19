@@ -1,16 +1,19 @@
 from playwright.sync_api import sync_playwright, Playwright
+import csv
+import sys
 
 JTX_URL = "https://www.jointex.co.jp/DFiDtl001Servlet?orderCode="
 
-order_codes=[
-    "832151",
-    "349813",
-    "483901",
-    "30600",
-    "32351"
-]
-
 items=[]
+
+def create_order_codes(csv_file_name):
+    with open(csv_file_name, newline='') as f:
+        spamreader = csv.reader(f)
+        order_codes = []
+        for row in spamreader:
+            order_codes.append(row[0])
+        return order_codes
+
 
 def run(Playwright, order_codes):
     chromium = Playwright.chromium
@@ -42,5 +45,9 @@ def run(Playwright, order_codes):
     browser.close()
 
 with sync_playwright() as playwright:
-    run(playwright, order_codes)
-    print(items)
+    csv_file_name = sys.argv[1]
+    if not csv_file_name.endswith(".csv"):
+        csv_file_name = csv_file_name + ".csv"    
+        order_codes=  create_order_codes(csv_file_name)
+        run(playwright, order_codes)
+        print(items)
