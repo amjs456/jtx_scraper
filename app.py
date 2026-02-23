@@ -3,6 +3,7 @@ import csv
 import sys
 import openpyxl
 from openpyxl.styles import Font
+import re
 
 
 JTX_URL = "https://www.jointex.co.jp/DFiDtl001Servlet?orderCode="
@@ -38,6 +39,13 @@ def run(Playwright, order_codes):
             url = page.url
             name = page.locator("div.info h2").inner_html()
 
+            is_discontinued = False
+            has_discontinuation_date = page.locator('tr', has=page.locator('th:has-text("販売中止予定日")')).locator('td').filter(has_text=re.compile(r'^\d{4}/\d{2}/\d{2}$')).count() > 0
+            has_discontinued_date = page.locator('tr', has=page.locator('th:has-text("販売中止日")')).locator('td').filter(has_text=re.compile(r'^\d{4}/\d{2}/\d{2}$')).count() > 0
+            is_discontinued_img_exist =  page.locator('img[src="img/icon_img/ricon_13.png"], img[src="img/icon_img/ricon_14.png"], img[src="img/icon_img/ricon_20.png"]').count() > 0
+            if has_discontinuation_date or has_discontinued_date or is_discontinued_img_exist:
+                is_discontinued = True
+
         item_info = {
             "order_code":order_code,
             "maker":maker,
@@ -45,6 +53,7 @@ def run(Playwright, order_codes):
             "price":price,
             "is_price_red":is_price_red,
             "item_code":item_code,
+            "is_discontinued":is_discontinued,
             "url":url
         }
         items.append(item_info)
@@ -55,7 +64,7 @@ def run(Playwright, order_codes):
 
 def save_excel_file(items, filename):
     red_price_letter = "#"
-    header = ["注文コード", "クラウンかも", "キスパかも", "オーダーかも", "それ以外", "メーカー", "商品名", "品番", "価格", "URL"]
+    header = ["注文コード", "クラウンかも", "キスパかも", "オーダーかも", "それ以外", "メーカー", "商品名", "品番", "価格", "販売中止", "URL"]
     data = [header]
     price_idx = header.index("価格")
 
@@ -81,6 +90,10 @@ def save_excel_file(items, filename):
             record.append(red_price_letter+str(item["price"]))
         else:
             record.append(item["price"])
+        if item["is_discontinued"]:
+            record.append("1")
+        else:
+            record.append("0")
         record.append(item["url"])
         data.append(record)
 
