@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright, Playwright
 import csv
 import sys
 import openpyxl
+from openpyxl.styles import Font
 
 
 JTX_URL = "https://www.jointex.co.jp/DFiDtl001Servlet?orderCode="
@@ -53,10 +54,10 @@ def run(Playwright, order_codes):
     return items
 
 def save_excel_file(items, filename):
-    wb = openpyxl.Workbook()
-    
+    red_price_letter = "#"
     header = ["注文コード", "クラウンかも", "キスパかも", "オーダーかも", "それ以外", "メーカー", "商品名", "品番", "価格", "URL"]
     data = [header]
+    price_idx = header.index("価格")
 
     for item in items:
         record = []
@@ -77,12 +78,29 @@ def save_excel_file(items, filename):
         record.append(item["name"])
         record.append(item["item_code"])
         if item["is_price_red"]:
-            record.append("#"+str(item["price"]))
+            record.append(red_price_letter+str(item["price"]))
         else:
             record.append(item["price"])
         record.append(item["url"])
         data.append(record)
-    print(data)
+
+    wb = openpyxl.Workbook()
+    ws = wb["Sheet"]
+    ws.title = "JOINTEX"
+    for i, rec in enumerate(data):
+        for j, col in enumerate(rec):
+            col_letter = chr(ord("A")+j)
+            address = f"{col_letter}{i+1}"
+            if j==price_idx:
+                if col:
+                    if col.startswith(red_price_letter):
+                        ws[address] = col.replace(red_price_letter, "")
+                        ws[address].font = Font(color="ff0000")
+                    else:
+                        ws[address] = col
+            else:
+                ws[address] = col
+    wb.save(filename=filename)
 
 
 with sync_playwright() as playwright:
@@ -91,4 +109,4 @@ with sync_playwright() as playwright:
         csv_file_name = csv_file_name + ".csv"
     order_codes=  create_order_codes(csv_file_name)
     items = run(playwright, order_codes)
-    save_excel_file(items, "")
+    save_excel_file(items, "sample.xlsx")
