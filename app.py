@@ -25,6 +25,7 @@ def run(Playwright, order_codes):
     page = browser.new_page()
     items=[]
     item_n = len(order_codes)
+    is_discontinued = False
     for i, order_code in enumerate(order_codes):
         page.goto(JTX_URL+order_code)
         item_code = maker = url = name = price = is_price_red = None
@@ -39,7 +40,7 @@ def run(Playwright, order_codes):
             url = page.url
             name = page.locator("div.info h2").inner_html()
 
-            is_discontinued = False
+            
             has_discontinuation_date = page.locator('tr', has=page.locator('th:has-text("販売中止予定日")')).locator('td').filter(has_text=re.compile(r'^\d{4}/\d{2}/\d{2}$')).count() > 0
             has_discontinued_date = page.locator('tr', has=page.locator('th:has-text("販売中止日")')).locator('td').filter(has_text=re.compile(r'^\d{4}/\d{2}/\d{2}$')).count() > 0
             is_discontinued_img_exist =  page.locator('img[src="img/icon_img/ricon_13.png"], img[src="img/icon_img/ricon_14.png"], img[src="img/icon_img/ricon_20.png"]').count() > 0
