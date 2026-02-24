@@ -25,8 +25,9 @@ def run(Playwright, order_codes):
     page = browser.new_page()
     items=[]
     item_n = len(order_codes)
-    is_discontinued = False
+
     for i, order_code in enumerate(order_codes):
+        is_discontinued = False
         page.goto(JTX_URL+order_code)
         item_code = maker = url = name = price = is_price_red = None
 
